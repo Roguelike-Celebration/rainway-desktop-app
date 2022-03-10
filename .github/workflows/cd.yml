@@ -27,9 +27,9 @@ jobs:
       working-directory: host-example
 
     # Locally we debug the build output
-    - name: List bin (local only)
+    - name: List dist (local only)
       if: ${{ env.ACT }}
-      run: ls -alR bin
+      run: ls -alR host-example/dist
 
     - name: Parse git commit
       run: echo GH_REL_TAG=$(git rev-parse --short HEAD 2> /dev/null | sed "s/\(.*\)/v0-\1/") >> $GITHUB_ENV
@@ -46,7 +46,7 @@ jobs:
     - name: Package bin
       run: |
         mkdir rel
-        zip rel/host-example-${{ env.GH_REL_TAG }}.zip -r bin/host-example &&
+        zip rel/host-example-${{ env.GH_REL_TAG }}.zip -r host-example &&
         echo "Packaged."
 
     # Remotely we create the release from the tag
