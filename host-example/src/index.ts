@@ -17,7 +17,7 @@ const apiKey = cliArgs[0];
 
 Runtime.setLogLevel(RainwayLogLevel.Info);
 Runtime.setLogSink((runtime, level, target, message) => {
-  console.log(`${level ?? ""} [${target ?? ""}] ${message}`);
+  console.log(`${RainwayLogLevel[level]} [${target ?? ""}] ${message}`);
 });
 
 Runtime.initialize({
