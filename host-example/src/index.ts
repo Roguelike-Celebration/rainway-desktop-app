@@ -1,4 +1,5 @@
 import {
+  Peer,
   RainwayInputLevel,
   RainwayLogLevel,
   RainwayPeerState,
@@ -37,7 +38,8 @@ Runtime.initialize({
   // reverses the data sent by a peer over a channel and echos it back
   onPeerMessage: (runtime, peer, channel, data) => {
     const chars = Buffer.from(data).toString("utf-8");
-    const peerInstance = runtime.peers.get(peer)!;
+
+    const peerInstance = Peer.get(peer)!;
 
     const reversedChars = chars.split("").reverse().join("");
 

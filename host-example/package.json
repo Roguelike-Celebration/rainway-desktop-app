@@ -35,6 +35,6 @@
     "node": ">=17"
   },
   "dependencies": {
-    "rainway-sdk-native": "^0.2.5"
+    "rainway-sdk-native": "^0.2.6"
   }
 }
