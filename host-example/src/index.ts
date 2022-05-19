@@ -3,6 +3,7 @@ import {
   RainwayInputLevel,
   RainwayLogLevel,
   RainwayPeerState,
+  RainwayStreamType,
   Runtime,
 } from "rainway-sdk-native";
 
@@ -29,6 +30,7 @@ Runtime.initialize({
   // auto accepts all stream request and gives full input privileges to the remote peer
   onStreamRequest: (runtime, request) =>
     request.accept({
+      streamType: RainwayStreamType.FullDesktop,
       inputLevel:
         RainwayInputLevel.Mouse |
         RainwayInputLevel.Keyboard |
@@ -55,7 +57,6 @@ Runtime.initialize({
   onPeerError: () => {},
   onRuntimeConnectionLost: () => {},
   onStreamAnnouncement: () => {},
-  onStreamStop: () => {},
   /* eslint-enable @typescript-eslint/no-empty-function */
 }).then(async (runtime) => {
   console.log(`Rainway SDK Version: ${runtime.version}`);
