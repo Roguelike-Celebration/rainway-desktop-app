@@ -35,6 +35,9 @@
     "node": ">=17"
   },
   "dependencies": {
-    "rainway-sdk-native": "^0.4.0-beta.1"
+    "@rainway/native": "^0.4.0-beta.2"
+  },
+  "volta": {
+    "node": "17.9.1"
   }
 }

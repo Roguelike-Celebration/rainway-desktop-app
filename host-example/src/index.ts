@@ -1,11 +1,9 @@
-import {
-  Peer,
+import rainway, {
   RainwayInputLevel,
   RainwayLogLevel,
   RainwayPeerState,
   RainwayStreamType,
-  Runtime,
-} from "rainway-sdk-native";
+} from "@rainway/native";
 
 const cliArgs = process.argv.slice(2);
 
@@ -17,59 +15,73 @@ if (!cliArgs[0]) {
 
 const apiKey = cliArgs[0];
 
-Runtime.setLogLevel(RainwayLogLevel.Info);
-Runtime.setLogSink((runtime, level, target, message) => {
-  console.log(`${RainwayLogLevel[level]} [${target ?? ""}] ${message}`);
+rainway.logLevel = RainwayLogLevel.Info;
+rainway.addEventListener("log", (ev) => {
+  console.log(
+    `${RainwayLogLevel[ev.data.level]} [${ev.data.target}] ${ev.data.message}`
+  );
 });
 
-Runtime.initialize({
-  apiKey,
-  externalId: "",
-  // audo accepts all connection request
-  onConnectionRequest: (runtime, request) => request.accept(),
-  // auto accepts all stream request and gives full input privileges to the remote peer
-  onStreamRequest: (runtime, request) =>
-    request.accept({
-      streamType: RainwayStreamType.FullDesktop,
-      inputLevel:
-        RainwayInputLevel.Mouse |
-        RainwayInputLevel.Keyboard |
-        RainwayInputLevel.Gamepad,
-      isolateProcessIds: [],
-    }),
-  // reverses the data sent by a peer over a channel and echos it back
-  onPeerMessage: (runtime, peer, channel, data) => {
-    const chars = Buffer.from(data).toString("utf-8");
+(async function mainAsync() {
+  const conn = await rainway.connect({
+    apiKey,
+    externalId: "node-host-example",
+  });
 
-    const peerInstance = Peer.get(peer)!;
+  conn.addEventListener("peer-request", async (ev) => {
+    const peer = await ev.accept();
 
-    const reversedChars = chars.split("").reverse().join("");
+    peer.addEventListener("connection-state-change", (ev) => {
+      console.log(
+        `Peer ${peer.id} (${peer.externalId}) changed state to ${
+          RainwayPeerState[ev.data]
+        }`
+      );
+    });
 
-    peerInstance.send(channel, Buffer.from(reversedChars, "utf-8"));
-  },
-  // logs peer state changes, including connect and disconnect
-  onPeerStateChange: (runtime, peer, state) => {
-    console.log(`Peer ${peer} changed states to ${RainwayPeerState[state]}`);
-  },
+    peer.addEventListener("stream-request", async (ev) => {
+      const stream = await ev.accept({
+        type: RainwayStreamType.FullDesktop,
+        permissions: RainwayInputLevel.Mouse | RainwayInputLevel.Keyboard,
+        processIds: [],
+      });
 
-  /* eslint-disable @typescript-eslint/no-empty-function */
-  onPeerDataChannel: () => {},
-  onPeerError: () => {},
-  onRuntimeConnectionLost: () => {},
-  onStreamAnnouncement: () => {},
-  /* eslint-enable @typescript-eslint/no-empty-function */
-}).then(async (runtime) => {
-  console.log(`Rainway SDK Version: ${runtime.version}`);
-  console.log(`Peer ID: ${runtime.peerId}`);
+      console.log(
+        `Accepted request and created stream ${stream.id} (${
+          RainwayStreamType[stream.type]
+        })`
+      );
+    });
+
+    peer.addEventListener("datachannel", (ev) => {
+      const dc = ev.data;
+
+      dc.addEventListener("message", (ev) => {
+        console.log(ev.asString);
+        // echo back the characters, in reverse
+        const reversedChars = ev.asString.split("").reverse().join("");
+
+        console.log("sending back " + reversedChars);
+
+        dc.send(reversedChars);
+      });
+    });
+  });
+
+  console.log(`Rainway SDK Version: ${rainway.version}`);
+  console.log(`Peer ID: ${conn.id}`);
   console.log(`Press Ctrl+C to Terminate`);
 
-  // schedule some work to keep node from exiting
-  const eventLoopInterval = setInterval(() => {
-    // No actual work needed
-  }, 30 * 1000);
-
-  // clear the interval when CTRL+C signal is caught
-  process.on("SIGINT", () => {
-    clearInterval(eventLoopInterval);
+  // shutdown when CTRL+C signal is caught
+  await new Promise<void>((resolve) => {
+    process.once("SIGINT", () => {
+      resolve();
+    });
   });
-});
+
+  // clean up the connection
+  conn.close();
+})().then(
+  () => console.log("Shutting down"),
+  (e) => console.error(`Error: ${e}`)
+);
