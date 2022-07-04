@@ -6,6 +6,7 @@ import {
   RainwayStreamType,
   Runtime,
 } from "rainway-sdk-native";
+import fetch from 'node-fetch';
 
 const apiKey = process.env.RAINWAY_API_KEY
 
@@ -55,6 +56,14 @@ Runtime.initialize({
   console.log(`Peer ID: ${runtime.peerId}`);
   console.log(`Press Ctrl+C to Terminate`);
 
+  // TODO: Parameterize this
+  const response = await fetch(`${process.env.SERVER_HOSTNAME}/api/setRainwayPeerId`, {
+    method: 'POST', 
+    body: JSON.stringify({peerId: runtime.peerId}),
+    headers: {'Content-Type': 'application/json'}
+  })
+  
+  const data = await response.json();
   // schedule some work to keep node from exiting
   const eventLoopInterval = setInterval(() => {
     // No actual work needed
