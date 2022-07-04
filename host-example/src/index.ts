@@ -5,15 +5,7 @@ import rainway, {
   RainwayStreamType,
 } from "@rainway/native";
 
-const cliArgs = process.argv.slice(2);
-
-if (!cliArgs[0]) {
-  throw new Error(
-    `Expected <apiKey> as the first (and only) command line argument`
-  );
-}
-
-const apiKey = cliArgs[0];
+const apiKey = process.env.RAINWAY_API_KEY
 
 rainway.logLevel = RainwayLogLevel.Info;
 rainway.addEventListener("log", (ev) => {
