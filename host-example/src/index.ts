@@ -7,15 +7,7 @@ import {
   Runtime,
 } from "rainway-sdk-native";
 
-const cliArgs = process.argv.slice(2);
-
-if (!cliArgs[0]) {
-  throw new Error(
-    `Expected <apiKey> as the first (and only) command line argument`
-  );
-}
-
-const apiKey = cliArgs[0];
+const apiKey = process.env.RAINWAY_API_KEY
 
 Runtime.setLogLevel(RainwayLogLevel.Info);
 Runtime.setLogSink((runtime, level, target, message) => {
