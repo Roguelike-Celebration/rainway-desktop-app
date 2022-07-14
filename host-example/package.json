@@ -35,7 +35,7 @@
     "node": ">=17"
   },
   "dependencies": {
-    "@rainway/native": "^0.4.0-beta.2"
+    "@rainway/native": "^0.4.0-beta.3"
   },
   "volta": {
     "node": "17.9.1"
