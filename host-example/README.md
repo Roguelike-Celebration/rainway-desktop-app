@@ -1,6 +1,6 @@
 # host-example
 
-Host example using the Rainway SDK.
+A basic example that allows all web clients to connect and stream the desktop.
 
 ## Getting Started
 
