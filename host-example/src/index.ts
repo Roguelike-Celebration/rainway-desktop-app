@@ -5,7 +5,9 @@ import rainway, {
   RainwayStreamType,
 } from "@rainway/native";
 
-const apiKey = process.env.RAINWAY_API_KEY
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+require("dotenv").config();
+const apiKey = process.env.RAINWAY_API_KEY || "";
 
 rainway.logLevel = RainwayLogLevel.Info;
 rainway.addEventListener("log", (ev) => {
